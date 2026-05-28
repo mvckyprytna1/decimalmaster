@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Decimal Master — Latihan Hitung Desimal</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: '#1e293b',
+                        primary: '#3b82f6', // blue
+                        success: '#10b981', // green
+                        warning: '#f59e0b', // orange
+                        danger: '#ef4444',  // red
+                        magic: '#8b5cf6',   // purple
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { background-color: #f8fafc; }
+        
+        /* Smooth View Transitions */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .view-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .animate-pop { animation: pop 0.3s ease-in-out; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
+
+        /* Hide scrollbar for clean UI */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Bottom Nav Safe Area */
+        .pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 80px); }
+    </style>
+</head>
+<body class="text-slate-800 antialiased h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Header (Sticky) -->
+    <header class="bg-navy text-white px-4 py-3 shadow-md z-20 flex justify-between items-center shrink-0">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gradient-to-br from-primary to-magic rounded-lg flex items-center justify-center font-black text-xl">,</div>
+            <h1 class="font-bold text-lg tracking-wide hidden sm:block">Decimal Master</h1>
+            <h1 class="font-bold text-lg tracking-wide sm:hidden">Decimal</h1>
+        </div>
+        <div class="flex items-center gap-4 text-sm font-semibold">
+            <div class="flex items-center gap-1 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">
+                <i class="fa-solid fa-star text-warning"></i>
+                <span id="header-xp">0 XP</span>
+            </div>
+            <div class="flex items-center gap-1 bg-magic/20 text-magic-100 px-3 py-1.5 rounded-full border border-magic/30">
+                <i class="fa-solid fa-medal"></i>
+                <span>Lv. <span id="header-lvl">1</span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout Container -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- Sidebar (Desktop only) -->
+        <nav class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 p-4 gap-2 shrink-0 z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-2">Menu Utama</p>
+            <button onclick="nav('dashboard')" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-left font-bold text-slate-600 transition" data-target="dashboard"><i class="fa-solid fa-chart-pie w-5 text-primary"></i> Dashboard</button>
+            <button onclick="nav('practice-menu')" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-left font-bold text-slate-600 transition" data-target="practice-menu"><i class="fa-solid fa-dumbbell w-5 text-success"></i> Latihan Soal</button>
+            <button onclick="nav('tryout-menu')" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-left font-bold text-slate-600 transition" data-target="tryout-menu"><i class="fa-solid fa-stopwatch w-5 text-danger"></i> Try Out</button>
+            <button onclick="nav('cheatsheet')" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-left font-bold text-slate-600 transition" data-target="cheatsheet"><i class="fa-solid fa-book-open w-5 text-warning"></i> Cheat Sheet</button>
+            <button onclick="nav('history')" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 text-left font-bold text-slate-600 transition" data-target="history"><i class="fa-solid fa-clock-rotate-left w-5 text-magic"></i> Lihat Hasil</button>
+        </nav>
+
+        <!-- Content Area -->
+        <main class="flex-1 overflow-y-auto pb-safe md:pb-6 relative w-full" id="main-content">
+            
+            <!-- VIEW: DASHBOARD -->
+            <section id="view-dashboard" class="view-section p-4 md:p-8 max-w-5xl mx-auto active">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-extrabold text-navy">Halo, Pejuang Desimal! 👋</h2>
+                    <p class="text-slate-500 font-medium">Ayo tingkatkan kecepatan dan ketelitian hitungmu hari ini.</p>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center text-xl"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Dikerjakan</p>
+                            <p class="text-2xl font-black text-navy" id="stat-total">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center text-xl"><i class="fa-solid fa-check"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Benar</p>
+                            <p class="text-2xl font-black text-emerald-500" id="stat-correct">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center text-xl"><i class="fa-solid fa-xmark"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Salah</p>
+                            <p class="text-2xl font-black text-rose-500" id="stat-wrong">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center text-xl"><i class="fa-solid fa-fire"></i></div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase">Akurasi</p>
+                            <p class="text-2xl font-black text-orange-500" id="stat-accuracy">0%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Progress Card -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-5 md:p-6">
+                        <h3 class="font-bold text-lg text-navy mb-4"><i class="fa-solid fa-bars-progress text-primary mr-2"></i>Penguasaan Kategori</h3>
+                        <div class="space-y-4" id="mastery-bars">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Badges Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 md:p-6">
+                        <h3 class="font-bold text-lg text-navy mb-4"><i class="fa-solid fa-award text-warning mr-2"></i>Pencapaian</h3>
+                        <div class="grid grid-cols-2 gap-3" id="badges-container">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: PRACTICE MENU -->
+            <section id="view-practice-menu" class="view-section p-4 md:p-8 max-w-5xl mx-auto">
+                <h2 class="text-2xl font-extrabold text-navy mb-2">Pilih Mode Latihan 🎯</h2>
+                <p class="text-slate-500 font-medium mb-6">Pilih operasi hitung dan tentukan level kesulitanmu.</p>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Cards -->
+                    <button onclick="startPractice('add')" class="text-left bg-white p-5 rounded-2xl shadow-sm border-2 border-transparent hover:border-primary hover:shadow-md transition group relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl group-hover:scale-110 transition duration-300"><i class="fa-solid fa-plus"></i></div>
+                        <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-plus"></i></div>
+                        <h3 class="font-extrabold text-xl text-navy mb-1">Penjumlahan</h3>
+                        <p class="text-sm text-slate-500 font-medium">Latih mensejajarkan koma.</p>
+                    </button>
+                    
+                    <button onclick="startPractice('sub')" class="text-left bg-white p-5 rounded-2xl shadow-sm border-2 border-transparent hover:border-danger hover:shadow-md transition group relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl group-hover:scale-110 transition duration-300"><i class="fa-solid fa-minus"></i></div>
+                        <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-minus"></i></div>
+                        <h3 class="font-extrabold text-xl text-navy mb-1">Pengurangan</h3>
+                        <p class="text-sm text-slate-500 font-medium">Latih meminjam nilai melewati nol.</p>
+                    </button>
+                    
+                    <button onclick="startPractice('mul')" class="text-left bg-white p-5 rounded-2xl shadow-sm border-2 border-transparent hover:border-success hover:shadow-md transition group relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl group-hover:scale-110 transition duration-300"><i class="fa-solid fa-xmark"></i></div>
+                        <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-xmark"></i></div>
+                        <h3 class="font-extrabold text-xl text-navy mb-1">Perkalian</h3>
+                        <p class="text-sm text-slate-500 font-medium">Hitung total angka di belakang koma.</p>
+                    </button>
+                    
+                    <button onclick="startPractice('div')" class="text-left bg-white p-5 rounded-2xl shadow-sm border-2 border-transparent hover:border-magic hover:shadow-md transition group relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl group-hover:scale-110 transition duration-300"><i class="fa-solid fa-divide"></i></div>
+                        <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-divide"></i></div>
+                        <h3 class="font-extrabold text-xl text-navy mb-1">Pembagian</h3>
+                        <p class="text-sm text-slate-500 font-medium">Trik geser koma agar jadi bulat.</p>
+                    </button>
+                </div>
+
+                <!-- Level Selector Modal (Hidden by default) -->
+                <div id="level-modal" class="hidden fixed inset-0 bg-navy/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative">
+                        <button onclick="closeLevelModal()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"><i class="fa-solid fa-xmark"></i></button>
+                        <h3 class="font-extrabold text-xl text-navy mb-2 text-center">Pilih Level</h3>
+                        <p id="level-modal-desc" class="text-sm text-slate-500 text-center mb-6">Penjumlahan Desimal</p>
+                        
+                        <div class="space-y-3" id="level-buttons">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: ACTIVE SESSION (Practice & Tryout) -->
+            <section id="view-session" class="view-section p-4 md:p-8 max-w-3xl mx-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <button onclick="confirmExitSession()" class="text-slate-400 hover:text-danger font-bold text-sm bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100"><i class="fa-solid fa-arrow-left mr-2"></i> Keluar</button>
+                    
+                    <!-- Top Stats for Session -->
+                    <div class="flex gap-3">
+                        <div id="session-timer" class="hidden bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 font-black text-danger text-sm items-center gap-2">
+                            <i class="fa-solid fa-stopwatch"></i> <span>00:00</span>
+                        </div>
+                        <div class="bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-100 font-bold text-slate-600 text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-list-ol text-primary"></i> <span id="session-progress">Soal 1 / ~</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div class="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-slate-100 mb-6 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-slate-100">
+                        <div id="session-progress-bar" class="h-full bg-primary transition-all duration-300" style="width: 10%"></div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6" id="session-category">Latihan Penjumlahan • Level 1</p>
+                        <div class="text-5xl md:text-6xl font-black text-navy tracking-tight mb-8 font-sans select-none" id="question-text">
+                            0,0 + 0,0
+                        </div>
+                        
+                        <form id="answer-form" class="max-w-xs mx-auto relative">
+                            <input type="text" id="answer-input" autocomplete="off" inputmode="decimal" placeholder="Jawab di sini..." class="w-full text-center text-2xl font-bold text-navy py-4 px-6 rounded-2xl border-2 border-slate-200 bg-slate-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 outline-none transition transition-all placeholder:text-lg placeholder:font-semibold">
+                            <button type="submit" id="btn-check" class="mt-4 w-full bg-primary hover:bg-blue-600 text-white font-extrabold text-lg py-4 rounded-2xl shadow-[0_4px_0_rgb(29,78,216)] active:shadow-[0_0px_0_rgb(29,78,216)] active:translate-y-1 transition-all">Cek Jawaban</button>
+                            <button type="button" id="btn-next" class="hidden mt-4 w-full bg-navy hover:bg-slate-800 text-white font-extrabold text-lg py-4 rounded-2xl shadow-[0_4px_0_rgb(15,23,42)] active:shadow-[0_0px_0_rgb(15,23,42)] active:translate-y-1 transition-all">Lanjut Soal Berikutnya <i class="fa-solid fa-arrow-right ml-2"></i></button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Feedback Area (Hidden by default) -->
+                <div id="feedback-area" class="hidden space-y-4">
+                    <!-- Status Banner -->
+                    <div id="feedback-status" class="p-4 rounded-2xl font-bold text-lg flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div id="feedback-icon" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl"></div>
+                            <span id="feedback-msg">Benar!</span>
+                        </div>
+                        <div id="feedback-xp" class="text-sm px-3 py-1 bg-white/30 rounded-lg hidden">+10 XP</div>
+                    </div>
+
+                    <!-- Step-by-step -->
+                    <div class="bg-blue-50 border border-blue-100 rounded-2xl p-5 text-blue-900">
+                        <h4 class="font-bold mb-3 flex items-center gap-2"><i class="fa-solid fa-lightbulb text-warning"></i> Pembahasan</h4>
+                        <div id="feedback-steps" class="space-y-2 text-sm md:text-base font-medium font-mono bg-white p-4 rounded-xl border border-blue-50 leading-relaxed overflow-x-auto">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Anti Jebakan -->
+                    <div id="feedback-trap" class="bg-orange-50 border border-orange-200 rounded-2xl p-5 text-orange-900 hidden">
+                        <h4 class="font-bold mb-2 flex items-center gap-2 text-orange-700"><i class="fa-solid fa-triangle-exclamation"></i> Anti Jebakan!</h4>
+                        <p id="trap-msg" class="text-sm font-semibold"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: TRYOUT MENU -->
+            <section id="view-tryout-menu" class="view-section p-4 md:p-8 max-w-3xl mx-auto">
+                <div class="bg-gradient-to-br from-danger to-orange-500 rounded-3xl p-8 text-white mb-8 shadow-lg relative overflow-hidden">
+                    <i class="fa-solid fa-stopwatch absolute -right-10 -top-10 text-9xl opacity-20 transform -rotate-12"></i>
+                    <h2 class="text-3xl font-black mb-2 relative z-10">Uji Nyali: Try Out 🔥</h2>
+                    <p class="font-medium text-orange-100 relative z-10">Kumpulan soal campuran (Tambah, Kurang, Kali, Bagi) untuk menguji pemahaman totalmu.</p>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+                    <div class="mb-6">
+                        <label class="block font-bold text-navy mb-3">Jumlah Soal</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <button onclick="selectToQty(10)" id="to-qty-10" class="to-qty-btn bg-blue-50 border-2 border-primary text-primary font-bold py-3 rounded-xl">10 Soal</button>
+                            <button onclick="selectToQty(20)" id="to-qty-20" class="to-qty-btn bg-slate-50 border-2 border-slate-100 text-slate-500 font-bold py-3 rounded-xl hover:bg-slate-100">20 Soal</button>
+                            <button onclick="selectToQty(30)" id="to-qty-30" class="to-qty-btn bg-slate-50 border-2 border-slate-100 text-slate-500 font-bold py-3 rounded-xl hover:bg-slate-100">30 Soal</button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <label class="block font-bold text-navy mb-3">Batas Waktu (Timer)</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <button onclick="selectToTime(0)" id="to-time-0" class="to-time-btn bg-slate-50 border-2 border-slate-100 text-slate-500 font-bold py-3 rounded-xl hover:bg-slate-100">Santai<br><span class="text-xs font-normal">Tanpa Waktu</span></button>
+                            <button onclick="selectToTime(5)" id="to-time-5" class="to-time-btn bg-slate-50 border-2 border-slate-100 text-slate-500 font-bold py-3 rounded-xl hover:bg-slate-100">5<br><span class="text-xs font-normal">Menit</span></button>
+                            <button onclick="selectToTime(10)" id="to-time-10" class="to-time-btn bg-blue-50 border-2 border-primary text-primary font-bold py-3 rounded-xl">10<br><span class="text-xs font-normal">Menit</span></button>
+                            <button onclick="selectToTime(15)" id="to-time-15" class="to-time-btn bg-slate-50 border-2 border-slate-100 text-slate-500 font-bold py-3 rounded-xl hover:bg-slate-100">15<br><span class="text-xs font-normal">Menit</span></button>
+                        </div>
+                    </div>
+
+                    <button onclick="startTryout()" class="w-full bg-danger hover:bg-red-600 text-white font-extrabold text-xl py-4 rounded-2xl shadow-[0_4px_0_rgb(185,28,28)] active:shadow-[0_0px_0_rgb(185,28,28)] active:translate-y-1 transition-all">Mulai Try Out Sekarang!</button>
+                </div>
+            </section>
+
+            <!-- VIEW: TRYOUT RESULT -->
+            <section id="view-tryout-result" class="view-section p-4 md:p-8 max-w-3xl mx-auto text-center">
+                <div class="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-slate-100 mb-6">
+                    <div class="text-6xl mb-4" id="result-emoji">🎉</div>
+                    <h2 class="text-3xl font-black text-navy mb-2" id="result-title">Luar Biasa!</h2>
+                    <p class="text-slate-500 font-medium mb-8">Try Out berhasil diselesaikan.</p>
+                    
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-6 mb-8">
+                        <div class="bg-slate-50 rounded-2xl p-6 w-full md:w-48 border border-slate-100">
+                            <p class="text-sm font-bold text-slate-400 uppercase mb-1">Skor Akhir</p>
+                            <p class="text-5xl font-black text-primary" id="result-score">100</p>
+                        </div>
+                        <div class="flex flex-col gap-3 w-full md:w-auto text-left">
+                            <div class="flex items-center gap-3 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl font-bold border border-emerald-100">
+                                <i class="fa-solid fa-check-circle w-5"></i> <span id="result-correct">10 Benar</span>
+                            </div>
+                            <div class="flex items-center gap-3 bg-rose-50 text-rose-700 px-4 py-2 rounded-xl font-bold border border-rose-100">
+                                <i class="fa-solid fa-xmark-circle w-5"></i> <span id="result-wrong">0 Salah</span>
+                            </div>
+                            <div class="flex items-center gap-3 bg-slate-50 text-slate-600 px-4 py-2 rounded-xl font-bold border border-slate-200">
+                                <i class="fa-solid fa-clock w-5"></i> <span id="result-time">02:30</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="text-left bg-orange-50 border border-orange-200 rounded-2xl p-5">
+                        <h4 class="font-bold text-orange-800 flex items-center gap-2 mb-2"><i class="fa-solid fa-wand-magic-sparkles"></i> Saran Belajar</h4>
+                        <p id="result-recommendation" class="text-orange-700 font-medium text-sm leading-relaxed"></p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-4 justify-center">
+                    <button onclick="nav('dashboard')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-xl transition">Kembali ke Dashboard</button>
+                    <button onclick="nav('tryout-menu')" class="bg-primary hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-xl transition shadow-md">Coba Lagi</button>
+                </div>
+            </section>
+
+            <!-- VIEW: CHEATSHEET -->
+            <section id="view-cheatsheet" class="view-section p-4 md:p-8 max-w-5xl mx-auto">
+                <h2 class="text-3xl font-extrabold text-navy mb-2">Buku Sakti / Cheat Sheet 📖</h2>
+                <p class="text-slate-500 font-medium mb-8">Pahami konsep dasar dan anti jebakan sebelum ujian.</p>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Rule 1 -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border-l-8 border-primary">
+                        <h3 class="font-bold text-xl text-navy mb-3">➕➖ Tambah & Kurang</h3>
+                        <ul class="space-y-2 text-slate-600 font-medium">
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-success mt-1"></i> <span>Koma <strong class="text-navy">WAJIB</strong> lurus secara vertikal.</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-success mt-1"></i> <span>Tambahkan <strong class="text-navy">nol bayangan</strong> di ruang kosong belakang koma agar setara.</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-triangle-exclamation text-danger mt-1"></i> <span>Pengurangan: Jika nol di atas tidak cukup, pinjam dari kiri (walau melewati batas koma).</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Rule 2 -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border-l-8 border-success">
+                        <h3 class="font-bold text-xl text-navy mb-3">✖️ Perkalian Desimal</h3>
+                        <ul class="space-y-2 text-slate-600 font-medium">
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-success mt-1"></i> <span>Abaikan koma sementara. Kalikan seperti bilangan bulat biasa.</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-success mt-1"></i> <span>Hitung <strong class="text-navy">total jumlah angka di belakang koma</strong> dari kedua bilangan.</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-success mt-1"></i> <span>Taruh koma di hasil akhir sebanyak total angka tersebut (dihitung dari kanan).</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Rule 3 -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border-l-8 border-magic">
+                        <h3 class="font-bold text-xl text-navy mb-3">➗ Pembagian Desimal</h3>
+                        <ul class="space-y-2 text-slate-600 font-medium">
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-success mt-1"></i> <span>Pembagi (angka yang membagi) <strong class="text-navy">TIDAK BOLEH</strong> desimal.</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-success mt-1"></i> <span>Geser koma ke kanan sampai pembagi jadi bilangan bulat (kalikan 10, 100, dst).</span></li>
+                            <li class="flex items-start gap-2"><i class="fa-solid fa-triangle-exclamation text-danger mt-1"></i> <span>Bilangan yang dibagi <strong class="text-navy">juga wajib</strong> digeser komanya sama banyak!</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Fractions -->
+                    <div class="bg-slate-800 rounded-2xl p-6 shadow-sm text-white border-b-8 border-warning">
+                        <h3 class="font-bold text-xl text-warning mb-3"><i class="fa-solid fa-star"></i> Pecahan Favorit Ujian</h3>
+                        <div class="grid grid-cols-2 gap-4 font-mono text-lg text-center mt-4">
+                            <div class="bg-slate-700 py-2 rounded-lg">1/2 = <span class="text-warning font-bold">0,5</span></div>
+                            <div class="bg-slate-700 py-2 rounded-lg">1/4 = <span class="text-warning font-bold">0,25</span></div>
+                            <div class="bg-slate-700 py-2 rounded-lg">3/4 = <span class="text-warning font-bold">0,75</span></div>
+                            <div class="bg-slate-700 py-2 rounded-lg">1/5 = <span class="text-warning font-bold">0,2</span></div>
+                            <div class="bg-slate-700 py-2 rounded-lg">1/8 = <span class="text-warning font-bold">0,125</span></div>
+                            <div class="bg-slate-700 py-2 rounded-lg">1/10 = <span class="text-warning font-bold">0,1</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: HISTORY -->
+            <section id="view-history" class="view-section p-4 md:p-8 max-w-5xl mx-auto">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-3xl font-extrabold text-navy mb-2">Riwayat Belajar 🕒</h2>
+                        <p class="text-slate-500 font-medium">Catatan perjuangan dan hasil try out kamu.</p>
+                    </div>
+                    <button onclick="clearData()" class="text-sm font-bold text-danger hover:underline bg-red-50 px-4 py-2 rounded-lg border border-red-100"><i class="fa-solid fa-trash mr-1"></i> Reset Data</button>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                                <tr>
+                                    <th class="p-4">Tanggal</th>
+                                    <th class="p-4">Mode</th>
+                                    <th class="p-4 text-center">Soal</th>
+                                    <th class="p-4 text-center">Skor/Benar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table" class="divide-y divide-slate-100 font-medium">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="history-empty" class="hidden p-8 text-center text-slate-400">
+                        <i class="fa-solid fa-ghost text-4xl mb-3 opacity-20"></i>
+                        <p>Belum ada riwayat. Ayo mulai latihan!</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Bottom Navigation (Mobile Only) -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 flex justify-around pb-[env(safe-area-inset-bottom)] z-20 shadow-[0_-4px_24px_rgba(0,0,0,0.05)]">
+        <button onclick="nav('dashboard')" class="nav-btn w-full py-4 flex flex-col items-center gap-1 text-slate-400 hover:text-navy transition" data-target="dashboard">
+            <i class="fa-solid fa-chart-pie text-xl"></i><span class="text-[10px] font-bold">Home</span>
+        </button>
+        <button onclick="nav('practice-menu')" class="nav-btn w-full py-4 flex flex-col items-center gap-1 text-slate-400 hover:text-navy transition" data-target="practice-menu">
+            <i class="fa-solid fa-dumbbell text-xl"></i><span class="text-[10px] font-bold">Latihan</span>
+        </button>
+        <button onclick="nav('tryout-menu')" class="nav-btn w-full py-4 flex flex-col items-center gap-1 text-slate-400 hover:text-navy transition relative" data-target="tryout-menu">
+            <div class="absolute -top-4 w-12 h-12 bg-danger text-white rounded-full flex items-center justify-center border-4 border-[#f8fafc] shadow-lg"><i class="fa-solid fa-stopwatch text-xl"></i></div>
+            <span class="text-[10px] font-bold mt-5">Try Out</span>
+        </button>
+        <button onclick="nav('cheatsheet')" class="nav-btn w-full py-4 flex flex-col items-center gap-1 text-slate-400 hover:text-navy transition" data-target="cheatsheet">
+            <i class="fa-solid fa-book-open text-xl"></i><span class="text-[10px] font-bold">Rumus</span>
+        </button>
+        <button onclick="nav('history')" class="nav-btn w-full py-4 flex flex-col items-center gap-1 text-slate-400 hover:text-navy transition" data-target="history">
+            <i class="fa-solid fa-clock-rotate-left text-xl"></i><span class="text-[10px] font-bold">Hasil</span>
+        </button>
+    </nav>
+
+    <!-- JS Logic -->
+    <script>
+        // --- 1. STATE & DATA MANAGEMENT ---
+        let state = {
+            xp: 0,
+            stats: { total: 0, correct: 0, wrong: 0, streak: 0 },
+            history: [],
+            unlockedBadges: [],
+            categoryLevels: { add: 1, sub: 1, mul: 1, div: 1 },
+            tryoutConfig: { qty: 10, time: 10 } // time in minutes
+        };
+
+        const CATEGORY_NAMES = { add: 'Penjumlahan', sub: 'Pengurangan', mul: 'Perkalian', div: 'Pembagian' };
+        
+        const BADGES = [
+            { id: 'pemula', name: 'Pemula Desimal', desc: 'Selesaikan 10 soal pertama.', icon: '👶', color: 'bg-blue-100 text-blue-600' },
+            { id: 'jago_koma', name: 'Jago Koma', desc: 'Jawab 50 soal benar.', icon: '🎯', color: 'bg-emerald-100 text-emerald-600' },
+            { id: 'streak_10', name: 'On Fire!', desc: '10 jawaban benar beruntun.', icon: '🔥', color: 'bg-orange-100 text-orange-600' },
+            { id: 'raja_tryout', name: 'Raja Try Out', desc: 'Selesaikan Try Out dengan skor 100.', icon: '👑', color: 'bg-purple-100 text-purple-600' }
+        ];
+
+        let currentSession = null;
+        let tryoutTimerInterval = null;
+
+        // Load state from localStorage
+        function loadData() {
+            const saved = localStorage.getItem('decimalMasterData');
+            if (saved) {
+                state = { ...state, ...JSON.parse(saved) };
+            }
+            updateDashboardUI();
+        }
+
+        function saveData() {
+            localStorage.setItem('decimalMasterData', JSON.stringify(state));
+            updateDashboardUI();
+        }
+
+        function getLevel() {
+            return Math.floor(Math.sqrt(state.xp / 50)) + 1;
+        }
+
+        // --- 2. MATH UTILS & GENERATORS ---
+        // JS floating point is annoying (0.1+0.2=0.30000004). We need robust helpers.
+        function getDecimals(numStr) {
+            if (Math.floor(numStr) === numStr) return 0;
+            const str = numStr.toString();
+            if (str.indexOf('.') !== -1 && str.indexOf('e') === -1) {
+                return str.split('.')[1].length;
+            }
+            return 0;
+        }
+
+        function countStrDecimals(str) {
+            if (!str.includes(',')) return 0;
+            return str.split(',')[1].length;
+        }
+
+        function safeMath(a, b, op) {
+            const decA = getDecimals(a);
+            const decB = getDecimals(b);
+            const maxDec = Math.max(decA, decB);
+            
+            // For mult/div, scaling factor shifts
+            if (op === 'mul') {
+                const fa = Math.pow(10, decA);
+                const fb = Math.pow(10, decB);
+                return ((a * fa) * (b * fb)) / (fa * fb);
+            }
+            if (op === 'div') {
+                const fa = Math.pow(10, decA);
+                const fb = Math.pow(10, decB);
+                const maxF = Math.max(fa, fb);
+                return Math.round(a * maxF) / Math.round(b * maxF);
+            }
+            // Add/Sub
+            const factor = Math.pow(10, maxDec);
+            const valA = Math.round(a * factor);
+            const valB = Math.round(b * factor);
+            return op === 'add' ? (valA + valB) / factor : (valA - valB) / factor;
+        }
+
+        function formatID(num) {
+            return num.toString().replace('.', ',');
+        }
+
+        function parseID(str) {
+            return parseFloat(str.replace(',', '.'));
+        }
+
+        function randomDec(min, max, decimals) {
+            const factor = Math.pow(10, decimals);
+            const r = Math.floor(Math.random() * (max * factor - min * factor + 1)) + min * factor;
+            return r / factor;
+        }
+
+        // --- QUESTION GENERATOR ---
+        function generateQuestion(cat, level) {
+            let a, b, ans;
+            let trap = "";
+            let stepsHTML = "";
+
+            if (cat === 'add') {
+                if (level === 1) { a = randomDec(1, 9, 1); b = randomDec(1, 9, 1); }
+                else if (level === 2) { a = randomDec(10, 99, 2); b = randomDec(1, 9, 1); }
+                else if (level === 3) { a = randomDec(10, 99, 3); b = randomDec(1, 99, 2); trap = "Ingat tambahkan nol di akhir angka agar sejajar."; }
+                else if (level === 4) { a = randomDec(0, 9, 3); b = randomDec(0, 9, 3); }
+                else { a = randomDec(100, 999, 3); b = randomDec(10, 99, 2); }
+                ans = safeMath(a, b, 'add');
+                
+                // Steps logic
+                const maxD = Math.max(getDecimals(a), getDecimals(b));
+                const aStr = a.toFixed(maxD).replace('.',',');
+                const bStr = b.toFixed(maxD).replace('.',',');
+                stepsHTML = `<div class="text-right inline-block">
+                    <div>&nbsp;&nbsp;${aStr}</div>
+                    <div class="border-b border-blue-200 pb-1">+ ${bStr}</div>
+                    <div class="pt-1 font-bold text-success">&nbsp;&nbsp;${formatID(ans)}</div>
+                </div>`;
+            } 
+            else if (cat === 'sub') {
+                if (level === 1) { a = randomDec(5, 9, 1); b = randomDec(1, 4, 1); }
+                else if (level === 2) { a = randomDec(20, 50, 2); b = randomDec(1, 19, 2); }
+                else if (level === 3) { a = Math.floor(randomDec(10, 50, 0)); b = randomDec(1, 9, 2); trap = "Ubah bilangan bulat menjadi desimal, misal 10 menjadi 10,00."; }
+                else if (level === 4) { a = randomDec(5, 9, 1); b = randomDec(1, 4, 3); trap = "Pinjam dari kiri walau melewati nol."; }
+                else { a = randomDec(50, 99, 3); b = randomDec(10, 49, 1); }
+                
+                if (a < b) { let temp = a; a = b; b = temp; } // prevent negative
+                ans = safeMath(a, b, 'sub');
+
+                const maxD = Math.max(getDecimals(a), getDecimals(b));
+                const aStr = a.toFixed(maxD).replace('.',',');
+                const bStr = b.toFixed(maxD).replace('.',',');
+                stepsHTML = `<div class="text-right inline-block">
+                    <div>&nbsp;&nbsp;${aStr}</div>
+                    <div class="border-b border-blue-200 pb-1">- ${bStr}</div>
+                    <div class="pt-1 font-bold text-success">&nbsp;&nbsp;${formatID(ans)}</div>
+                </div>`;
+            }
+            else if (cat === 'mul') {
+                if (level === 1) { a = Math.floor(randomDec(2, 9, 0)); b = randomDec(0.1, 0.9, 1); }
+                else if (level === 2) { a = randomDec(1, 5, 1); b = randomDec(1, 5, 1); }
+                else if (level === 3) { a = randomDec(0.1, 0.9, 1); b = randomDec(0.1, 0.9, 2); trap = "Hasilnya akan mengecil jika dikali 0,..."; }
+                else if (level === 4) { a = randomDec(10, 50, 1); b = randomDec(0.01, 0.09, 2); }
+                else { a = randomDec(2, 9, 2); b = randomDec(2, 9, 2); }
+                ans = safeMath(a, b, 'mul');
+
+                const intA = Math.round(a * Math.pow(10, getDecimals(a)));
+                const intB = Math.round(b * Math.pow(10, getDecimals(b)));
+                const intRes = intA * intB;
+                const totDec = getDecimals(a) + getDecimals(b);
+                stepsHTML = `1) Abaikan koma: ${intA} × ${intB} = ${intRes}<br>
+                             2) Total desimal: ${getDecimals(a)} + ${getDecimals(b)} = ${totDec} angka<br>
+                             3) Beri koma: ${intRes} digeser kiri ${totDec}x = <span class="text-success font-bold">${formatID(ans)}</span>`;
+            }
+            else if (cat === 'div') {
+                // Ensure nice division
+                let intA, intB;
+                if (level === 1) { intB = Math.floor(randomDec(2, 9, 0)); intA = intB * Math.floor(randomDec(2, 9, 0)); a = intA / 10; b = intB; }
+                else if (level === 2) { intB = Math.floor(randomDec(2, 9, 0)); intA = intB * Math.floor(randomDec(10, 50, 0)); a = intA / 10; b = intB / 10; }
+                else if (level === 3) { intB = Math.floor(randomDec(2, 9, 0)); intA = intB * Math.floor(randomDec(2, 9, 0)); a = intA; b = intB / 100; trap = "Membagi dengan angka kecil (0,..) membuat hasil lebih besar dari soal awal!";}
+                else if (level === 4) { intB = Math.floor(randomDec(11, 20, 0)); intA = intB * Math.floor(randomDec(2, 9, 0)); a = intA / 100; b = intB / 10; }
+                else { intB = Math.floor(randomDec(2, 9, 0)); intA = intB * Math.floor(randomDec(11, 50, 0)); a = intA / 100; b = intB / 100; }
+                
+                ans = safeMath(a, b, 'div');
+                
+                const shiftAmount = getDecimals(b);
+                if (shiftAmount > 0) {
+                    const mult = Math.pow(10, shiftAmount);
+                    stepsHTML = `1) Pembagi tidak boleh desimal!<br>
+                                 2) Kalikan keduanya dengan ${mult} (geser ${shiftAmount}x)<br>
+                                 3) Soal berubah jadi: ${formatID(safeMath(a, mult, 'mul'))} ÷ ${formatID(safeMath(b, mult, 'mul'))}<br>
+                                 4) Hasil bagi = <span class="text-success font-bold">${formatID(ans)}</span>`;
+                } else {
+                    stepsHTML = `Bagikan seperti biasa (pembagi sudah bulat): ${formatID(a)} ÷ ${formatID(b)} = <span class="text-success font-bold">${formatID(ans)}</span>`;
+                }
+            }
+
+            const ops = { add: '+', sub: '-', mul: '×', div: '÷' };
+            const qText = `${formatID(a)} ${ops[cat]} ${formatID(b)}`;
+
+            return { a, b, ans, qText, stepsHTML, trap, cat, level };
+        }
+
+        // --- 3. UI RENDERING & NAVIGATION ---
+        function nav(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            
+            // Update nav active states
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.target === viewId) {
+                    btn.classList.add('bg-blue-50', 'text-primary');
+                    btn.classList.remove('text-slate-600', 'text-slate-400');
+                } else {
+                    btn.classList.remove('bg-blue-50', 'text-primary');
+                    if (window.innerWidth >= 768) btn.classList.add('text-slate-600');
+                    else btn.classList.add('text-slate-400');
+                }
+            });
+
+            if (viewId === 'dashboard') updateDashboardUI();
+            if (viewId === 'history') updateHistoryUI();
+
+            // Clear session if navigating away
+            if (viewId !== 'session' && currentSession) {
+                clearInterval(tryoutTimerInterval);
+                currentSession = null;
+            }
+        }
+
+        function updateDashboardUI() {
+            document.getElementById('header-xp').innerText = `${state.xp} XP`;
+            document.getElementById('header-lvl').innerText = getLevel();
+            
+            document.getElementById('stat-total').innerText = state.stats.total;
+            document.getElementById('stat-correct').innerText = state.stats.correct;
+            document.getElementById('stat-wrong').innerText = state.stats.wrong;
+            const acc = state.stats.total > 0 ? Math.round((state.stats.correct / state.stats.total) * 100) : 0;
+            document.getElementById('stat-accuracy').innerText = `${acc}%`;
+
+            // Progress Bars
+            let barsHtml = '';
+            ['add', 'sub', 'mul', 'div'].forEach(c => {
+                const lvl = state.categoryLevels[c];
+                const w = (lvl / 5) * 100;
+                barsHtml += `
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                            <span>${CATEGORY_NAMES[c]} (Lv. ${lvl})</span>
+                            <span>${w}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                            <div class="bg-primary h-full transition-all duration-500" style="width: ${w}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('mastery-bars').innerHTML = barsHtml;
+
+            // Check & Render Badges
+            checkBadges();
+            let badgesHtml = '';
+            BADGES.forEach(b => {
+                const unlocked = state.unlockedBadges.includes(b.id);
+                badgesHtml += `
+                    <div class="${unlocked ? b.color : 'bg-slate-50 text-slate-300 opacity-50 grayscale'} rounded-xl p-3 flex flex-col items-center justify-center text-center transition">
+                        <div class="text-2xl mb-1">${b.icon}</div>
+                        <div class="text-xs font-bold">${b.name}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('badges-container').innerHTML = badgesHtml;
+        }
+
+        function checkBadges() {
+            const addBadge = (id) => {
+                if (!state.unlockedBadges.includes(id)) state.unlockedBadges.push(id);
+            };
+            if (state.stats.total >= 10) addBadge('pemula');
+            if (state.stats.correct >= 50) addBadge('jago_koma');
+            if (state.stats.streak >= 10) addBadge('streak_10');
+            // 'raja_tryout' handled in tryout result
+            saveData(); // saves state invisibly
+        }
+
+        // --- 4. PRACTICE FLOW ---
+        let selectedCategoryForPractice = null;
+
+        function startPractice(cat) {
+            selectedCategoryForPractice = cat;
+            document.getElementById('level-modal-desc').innerText = `Latihan ${CATEGORY_NAMES[cat]}`;
+            
+            let btnsHtml = '';
+            for(let i=1; i<=5; i++) {
+                const isUnlocked = i <= state.categoryLevels[cat];
+                if (isUnlocked) {
+                    btnsHtml += `<button onclick="initPracticeSession('${cat}', ${i})" class="w-full bg-white border-2 border-slate-200 hover:border-primary hover:bg-blue-50 text-navy font-bold py-3 rounded-xl transition shadow-sm text-left px-4 flex justify-between items-center"><span>Level ${i}</span> <i class="fa-solid fa-chevron-right text-slate-300"></i></button>`;
+                } else {
+                    btnsHtml += `<button disabled class="w-full bg-slate-50 border-2 border-slate-100 text-slate-400 font-bold py-3 rounded-xl shadow-none text-left px-4 flex justify-between items-center opacity-70"><span>Level ${i} <span class="text-xs font-normal ml-2">(Terkunci)</span></span> <i class="fa-solid fa-lock text-slate-300"></i></button>`;
+                }
+            }
+            document.getElementById('level-buttons').innerHTML = btnsHtml;
+            document.getElementById('level-modal').classList.remove('hidden');
+        }
+
+        function closeLevelModal() {
+            document.getElementById('level-modal').classList.add('hidden');
+        }
+
+        function initPracticeSession(cat, level) {
+            closeLevelModal();
+            currentSession = {
+                type: 'practice',
+                cat: cat,
+                level: level,
+                questionCount: 1,
+                currentQ: generateQuestion(cat, level)
+            };
+            
+            document.getElementById('session-category').innerText = `Latihan ${CATEGORY_NAMES[cat]} • Level ${level}`;
+            document.getElementById('session-timer').classList.add('hidden');
+            document.getElementById('session-progress').innerText = `Soal 1 / ~`;
+            document.getElementById('session-progress-bar').style.width = '100%';
+            
+            renderQuestion();
+            nav('session');
+        }
+
+        function renderQuestion() {
+            const q = currentSession.currentQ;
+            const qEl = document.getElementById('question-text');
+            qEl.innerText = `${q.qText} = ?`;
+            qEl.classList.remove('animate-pop');
+            void qEl.offsetWidth; // trigger reflow
+            qEl.classList.add('animate-pop');
+
+            document.getElementById('answer-input').value = '';
+            document.getElementById('answer-input').disabled = false;
+            document.getElementById('answer-input').focus();
+            
+            document.getElementById('btn-check').classList.remove('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+            document.getElementById('feedback-area').classList.add('hidden');
+        }
+
+        // Handle form submit (check answer)
+        document.getElementById('answer-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (document.getElementById('btn-check').classList.contains('hidden')) {
+                // If enter pressed while "Next" is showing
+                handleNextQuestion();
+                return;
+            }
+            
+            const inputVal = document.getElementById('answer-input').value.trim();
+            if (inputVal === '') return;
+
+            // Accept both dot and comma from user input
+            const userAns = parseID(inputVal);
+            if (isNaN(userAns)) return;
+
+            const q = currentSession.currentQ;
+            const isCorrect = Math.abs(userAns - q.ans) < 0.000001; // FP safe check
+
+            // Update stats
+            state.stats.total++;
+            if (isCorrect) {
+                state.stats.correct++;
+                state.stats.streak++;
+                state.xp += 10;
+            } else {
+                state.stats.wrong++;
+                state.stats.streak = 0;
+                state.xp += 2;
+            }
+            saveData();
+
+            // Check if level up
+            if (currentSession.type === 'practice' && isCorrect && state.stats.streak % 3 === 0) {
+                if (currentSession.level < 5 && state.categoryLevels[currentSession.cat] === currentSession.level) {
+                    state.categoryLevels[currentSession.cat]++;
+                    saveData();
+                }
+            }
+
+            showFeedback(isCorrect, q);
+
+            if (currentSession.type === 'tryout') {
+                currentSession.answers.push({ q: q, userAns: userAns, isCorrect: isCorrect });
+            }
+        });
+
+        function showFeedback(isCorrect, q) {
+            document.getElementById('answer-input').disabled = true;
+            document.getElementById('btn-check').classList.add('hidden');
+            
+            const fArea = document.getElementById('feedback-area');
+            const fStatus = document.getElementById('feedback-status');
+            const fIcon = document.getElementById('feedback-icon');
+            const fMsg = document.getElementById('feedback-msg');
+            const fXp = document.getElementById('feedback-xp');
+            const fTrap = document.getElementById('feedback-trap');
+
+            fArea.classList.remove('hidden');
+            fXp.classList.remove('hidden');
+
+            if (isCorrect) {
+                fStatus.className = 'p-4 rounded-2xl font-bold text-lg flex items-center justify-between shadow-sm bg-success text-white animate-pop';
+                fIcon.innerHTML = '<i class="fa-solid fa-check"></i>';
+                fMsg.innerText = 'Jawaban Benar!';
+                fXp.innerText = '+10 XP';
+            } else {
+                fStatus.className = 'p-4 rounded-2xl font-bold text-lg flex items-center justify-between shadow-sm bg-danger text-white animate-shake';
+                fIcon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+                fMsg.innerText = `Salah. Kunci: ${formatID(q.ans)}`;
+                fXp.innerText = '+2 XP';
+                document.getElementById('answer-input').value = formatID(q.ans);
+                document.getElementById('answer-input').classList.add('text-danger');
+            }
+
+            document.getElementById('feedback-steps').innerHTML = q.stepsHTML;
+
+            if (q.trap) {
+                fTrap.classList.remove('hidden');
+                document.getElementById('trap-msg').innerText = q.trap;
+            } else {
+                fTrap.classList.add('hidden');
+            }
+
+            // In tryout, btn-next is handle next logic, if last, change text
+            const btnNext = document.getElementById('btn-next');
+            btnNext.classList.remove('hidden');
+            btnNext.focus();
+            
+            if (currentSession.type === 'tryout' && currentSession.currentQIndex === currentSession.totalQ - 1) {
+                btnNext.innerHTML = 'Selesaikan Try Out <i class="fa-solid fa-flag-checkered ml-2"></i>';
+                btnNext.classList.replace('bg-navy', 'bg-warning');
+            } else {
+                btnNext.innerHTML = 'Lanjut Soal Berikutnya <i class="fa-solid fa-arrow-right ml-2"></i>';
+                btnNext.classList.replace('bg-warning', 'bg-navy');
+            }
+        }
+
+        document.getElementById('btn-next').addEventListener('click', handleNextQuestion);
+
+        function handleNextQuestion() {
+            document.getElementById('answer-input').classList.remove('text-danger');
+            
+            if (currentSession.type === 'practice') {
+                currentSession.questionCount++;
+                document.getElementById('session-progress').innerText = `Soal ${currentSession.questionCount} / ~`;
+                currentSession.currentQ = generateQuestion(currentSession.cat, currentSession.level);
+                renderQuestion();
+            } 
+            else if (currentSession.type === 'tryout') {
+                currentSession.currentQIndex++;
+                if (currentSession.currentQIndex >= currentSession.totalQ) {
+                    finishTryout();
+                } else {
+                    document.getElementById('session-progress').innerText = `Soal ${currentSession.currentQIndex + 1} / ${currentSession.totalQ}`;
+                    const pct = ((currentSession.currentQIndex) / currentSession.totalQ) * 100;
+                    document.getElementById('session-progress-bar').style.width = `${pct}%`;
+                    currentSession.currentQ = currentSession.questions[currentSession.currentQIndex];
+                    renderQuestion();
+                }
+            }
+        }
+
+        function confirmExitSession() {
+            if (confirm("Yakin ingin keluar? Progress saat ini tidak akan disimpan ke riwayat.")) {
+                clearInterval(tryoutTimerInterval);
+                currentSession = null;
+                nav('dashboard');
+            }
+        }
+
+        // --- 5. TRY OUT FLOW ---
+        function selectToQty(q) {
+            state.tryoutConfig.qty = q;
+            document.querySelectorAll('.to-qty-btn').forEach(btn => {
+                btn.className = 'to-qty-btn bg-slate-50 border-2 border-slate-100 text-slate-500 font-bold py-3 rounded-xl hover:bg-slate-100 transition';
+            });
+            document.getElementById(`to-qty-${q}`).className = 'to-qty-btn bg-blue-50 border-2 border-primary text-primary font-bold py-3 rounded-xl transition shadow-sm';
+        }
+
+        function selectToTime(t) {
+            state.tryoutConfig.time = t;
+            document.querySelectorAll('.to-time-btn').forEach(btn => {
+                btn.className = 'to-time-btn bg-slate-50 border-2 border-slate-100 text-slate-500 font-bold py-3 rounded-xl hover:bg-slate-100 transition flex flex-col items-center justify-center';
+            });
+            document.getElementById(`to-time-${t}`).className = 'to-time-btn bg-blue-50 border-2 border-primary text-primary font-bold py-3 rounded-xl transition shadow-sm flex flex-col items-center justify-center';
+        }
+
+        function startTryout() {
+            const qty = state.tryoutConfig.qty;
+            const time = state.tryoutConfig.time; // in minutes
+            
+            // Generate mixed questions
+            const cats = ['add', 'sub', 'mul', 'div'];
+            const questions = [];
+            for(let i=0; i<qty; i++) {
+                const c = cats[i % 4];
+                // Tryout uses levels 2 to 4 mostly
+                const lvl = Math.floor(Math.random() * 3) + 2; 
+                questions.push(generateQuestion(c, lvl));
+            }
+            // Shuffle
+            questions.sort(() => Math.random() - 0.5);
+
+            currentSession = {
+                type: 'tryout',
+                totalQ: qty,
+                currentQIndex: 0,
+                questions: questions,
+                currentQ: questions[0],
+                answers: [],
+                timeLimit: time * 60, // in seconds
+                timeSpent: 0
+            };
+
+            document.getElementById('session-category').innerText = `Try Out (${qty} Soal)`;
+            document.getElementById('session-progress').innerText = `Soal 1 / ${qty}`;
+            document.getElementById('session-progress-bar').style.width = '0%';
+            
+            const timerEl = document.getElementById('session-timer');
+            if (time > 0) {
+                timerEl.classList.remove('hidden');
+                timerEl.classList.add('flex');
+                updateTimerDisplay(currentSession.timeLimit);
+                clearInterval(tryoutTimerInterval);
+                tryoutTimerInterval = setInterval(() => {
+                    currentSession.timeLimit--;
+                    currentSession.timeSpent++;
+                    updateTimerDisplay(currentSession.timeLimit);
+                    if (currentSession.timeLimit <= 0) {
+                        clearInterval(tryoutTimerInterval);
+                        alert("Waktu habis!");
+                        finishTryout();
+                    }
+                }, 1000);
+            } else {
+                timerEl.classList.add('hidden');
+                timerEl.classList.remove('flex');
+                tryoutTimerInterval = setInterval(() => { currentSession.timeSpent++; }, 1000);
+            }
+
+            renderQuestion();
+            nav('session');
+        }
+
+        function updateTimerDisplay(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2, '0');
+            const s = (sec % 60).toString().padStart(2, '0');
+            document.getElementById('session-timer').innerHTML = `<i class="fa-solid fa-stopwatch"></i> <span>${m}:${s}</span>`;
+            if (sec < 60) document.getElementById('session-timer').classList.add('animate-pulse');
+            else document.getElementById('session-timer').classList.remove('animate-pulse');
+        }
+
+        function finishTryout() {
+            clearInterval(tryoutTimerInterval);
+            
+            const total = currentSession.totalQ;
+            const correct = currentSession.answers.filter(a => a.isCorrect).length;
+            const score = Math.round((correct / total) * 100);
+            
+            // Calc weak category
+            const catErrors = { add: 0, sub: 0, mul: 0, div: 0 };
+            currentSession.answers.forEach(a => {
+                if (!a.isCorrect) catErrors[a.q.cat]++;
+            });
+            let weakestCat = Object.keys(catErrors).reduce((a, b) => catErrors[a] > catErrors[b] ? a : b);
+            if (catErrors[weakestCat] === 0) weakestCat = null;
+
+            // Render Result
+            document.getElementById('result-score').innerText = score;
+            document.getElementById('result-correct').innerText = `${correct} Benar`;
+            document.getElementById('result-wrong').innerText = `${total - correct} Salah`;
+            
+            const m = Math.floor(currentSession.timeSpent / 60);
+            const s = currentSession.timeSpent % 60;
+            document.getElementById('result-time').innerText = `${m}m ${s}s`;
+
+            const titleEl = document.getElementById('result-title');
+            const emojiEl = document.getElementById('result-emoji');
+            if (score === 100) {
+                titleEl.innerText = "Sempurna!"; emojiEl.innerText = "🏆";
+                if(!state.unlockedBadges.includes('raja_tryout')) {
+                    state.unlockedBadges.push('raja_tryout');
+                    alert("🎖️ Lencana Baru Terbuka: Raja Try Out!");
+                }
+            }
+            else if (score >= 80) { titleEl.innerText = "Luar Biasa!"; emojiEl.innerText = "🔥"; }
+            else if (score >= 60) { titleEl.innerText = "Cukup Bagus!"; emojiEl.innerText = "👍"; }
+            else { titleEl.innerText = "Ayo Semangat!"; emojiEl.innerText = "💪"; }
+
+            const recEl = document.getElementById('result-recommendation');
+            if (weakestCat) {
+                recEl.innerHTML = `Kamu terlihat sering keliru di soal <strong>${CATEGORY_NAMES[weakestCat]}</strong>. Coba buka menu <a href="#" onclick="nav('practice-menu')" class="underline font-bold text-orange-900">Latihan Soal</a> dan fokus ke kategori tersebut, atau baca triknya di <a href="#" onclick="nav('cheatsheet')" class="underline font-bold text-orange-900">Cheat Sheet</a>.`;
+            } else {
+                recEl.innerText = "Pertahankan prestasimu! Kamu menguasai semua materi operasi hitung desimal dengan sangat baik.";
+            }
+
+            // Save to history
+            const date = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            state.history.unshift({
+                date: date,
+                mode: `Try Out (${total} Soal)`,
+                qCount: total,
+                score: score,
+                correct: correct
+            });
+            if (state.history.length > 50) state.history.pop();
+            
+            state.xp += 50; // Tryout completion bonus
+            saveData();
+            
+            currentSession = null;
+            nav('tryout-result');
+        }
+
+        // --- 6. HISTORY LOGIC ---
+        function updateHistoryUI() {
+            const tb = document.getElementById('history-table');
+            const empty = document.getElementById('history-empty');
+            
+            if (state.history.length === 0) {
+                tb.innerHTML = '';
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            let html = '';
+            state.history.forEach(h => {
+                const isGood = h.score >= 80;
+                html += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-50 last:border-0">
+                        <td class="p-4">${h.date}</td>
+                        <td class="p-4 font-bold text-navy">${h.mode}</td>
+                        <td class="p-4 text-center">${h.qCount}</td>
+                        <td class="p-4 text-center font-bold ${isGood ? 'text-success' : 'text-danger'}">${h.score}</td>
+                    </tr>
+                `;
+            });
+            tb.innerHTML = html;
+        }
+
+        function clearData() {
+            if (confirm("PERINGATAN: Semua progres, skor, dan level akan dihapus! Yakin?")) {
+                localStorage.removeItem('decimalMasterData');
+                location.reload();
+            }
+        }
+
+        // --- INIT ---
+        window.onload = () => {
+            loadData();
+            // Default load tryout config UI
+            selectToQty(state.tryoutConfig.qty);
+            selectToTime(state.tryoutConfig.time);
+        };
+
+    </script>
+</body>
+</html>
